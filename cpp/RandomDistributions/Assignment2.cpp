@@ -36,18 +36,16 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
     std::uniform_int_distribution<int> distI(min, max + 1);
 
     // Make the DistributionPairs based off (max-min)/numberBins
-    unsigned int binBoundaries = std::lround((max - min) / numberBins); // Does this need 1 subtracted from it !???!
-    std::cout << binBoundaries << std::endl;
-    DistributionPair bin0(min, min + binBoundaries);
-    // std::cout << bin0.minValue << std::endl;
-    // std::cout << bin0.maxValue << std::endl;
+    unsigned int binBoundaries = std::lround(static_cast<double>((max - min)) / numberBins);
+    std::cout << "binBoundaries: " << binBoundaries << std::endl;
+    // Initialize the first bin and
+    DistributionPair bin0(min, (min + binBoundaries) - 1);
+    uniformVector.push_back(bin0);
 
-
-    for (int i = 0; i < numberBins; i++)
+    for (int i = 1; i < numberBins; i++)
     {
-        DistributionPair dp(1, 2);
+        DistributionPair dp(min + (i*binBoundaries), min + ((i*binBoundaries) + (binBoundaries - 1)));
         uniformVector.push_back(dp);
-
     }
 
     // for (int i = 0; i < howMany; i++)
@@ -90,7 +88,10 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
 int main()
 {
     auto uniform = generateUniformDistribution(100000, 0, 79, 40);
-    std::cout << uniform[0].count << std::endl;
+    for (int i = 0; i < uniform.size(); i++)
+    {
+        std::cout << "uniform[" << i << "]: min=" << uniform[i].minValue << " max=" << uniform[i].maxValue << std::endl;
+    }
 
     //plotDistribution("--- Uniform ---", uniform, 80);
 
