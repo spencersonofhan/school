@@ -32,13 +32,13 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
     std::vector<DistributionPair> uniformVector;
     std::random_device rd;
     std::default_random_engine engine(rd());
-    // We add one to max to make the distribution inclusive of the max number
-    std::uniform_int_distribution<int> distI(min, max + 1);
+    std::uniform_int_distribution<int> distI(min, max);
 
     // Make the DistributionPairs based off (max-min)/numberBins
     unsigned int binBoundaries = std::lround(static_cast<double>((max - min)) / numberBins);
     std::cout << "binBoundaries: " << binBoundaries << std::endl;
-    // Initialize the first bin and
+
+    // Initialize the first bin and adds it to uniformVector
     DistributionPair bin0(min, (min + binBoundaries) - 1);
     uniformVector.push_back(bin0);
 
@@ -48,14 +48,20 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
         uniformVector.push_back(dp);
     }
 
-    // for (int i = 0; i < howMany; i++)
-    // {
-    //     std::cout << distI(engine) << std::endl;
-    // }
+    int test40 = 0;
+    int test41 = 0;
 
-    // to get the correct upper and lower for each DP, divide howMany by numberBins and then round, that will be the amount in between the bounds
+    for (int i = 0; i < howMany; i++)
+    {
+        auto genNum = distI(engine); // Technically don't need these two lines.
+        auto genNumBin = genNum / binBoundaries;
+        uniformVector[genNumBin].count++;
+
+    }
 
     std::cout << "Uniform Distribution\n" << std::endl;
+    std::cout << "40 and 41 occurences: " << test40 << " | " << test41 << std::endl;
+    std::cout << uniformVector[20].count << std::endl;
     return uniformVector;
 }
 
