@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <cmath>
 
 class DistributionPair;
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins);
@@ -28,12 +29,36 @@ public:
 
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins)
 {
-    std::cout << "big money1";
-    unsigned int test1 = 3;
-    unsigned int test2 = 5;
-    DistributionPair t = DistributionPair(test1, test2);
-    std::vector<DistributionPair> bigmoney = { t };
-    return bigmoney;
+    std::vector<DistributionPair> uniformVector;
+    std::random_device rd;
+    std::default_random_engine engine(rd());
+    // We add one to max to make the distribution inclusive of the max number
+    std::uniform_int_distribution<int> distI(min, max + 1);
+
+    // Make the DistributionPairs based off (max-min)/numberBins
+    unsigned int binBoundaries = std::lround((max - min) / numberBins); // Does this need 1 subtracted from it !???!
+    std::cout << binBoundaries << std::endl;
+    DistributionPair bin0(min, min + binBoundaries);
+    // std::cout << bin0.minValue << std::endl;
+    // std::cout << bin0.maxValue << std::endl;
+
+
+    for (int i = 0; i < numberBins; i++)
+    {
+        DistributionPair dp(1, 2);
+        uniformVector.push_back(dp);
+
+    }
+
+    // for (int i = 0; i < howMany; i++)
+    // {
+    //     std::cout << distI(engine) << std::endl;
+    // }
+
+    // to get the correct upper and lower for each DP, divide howMany by numberBins and then round, that will be the amount in between the bounds
+
+    std::cout << "Uniform Distribution\n" << std::endl;
+    return uniformVector;
 }
 
 std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, float mean, float stdev, std::uint8_t numberBins)
@@ -62,20 +87,11 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
 }
 
 
-int main() 
+int main()
 {
-    std::random_device rd;
-    std::default_random_engine engine(rd());
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
-    std::uniform_int_distribution<int> distI(0, 50);
-
-    //for (int i = 0; i < 10; i++)
-    //{
-    //    std::cout << distI(engine) << std::endl;
-    //}
-
     auto uniform = generateUniformDistribution(100000, 0, 79, 40);
-    
+    std::cout << uniform[0].count << std::endl;
+
     //plotDistribution("--- Uniform ---", uniform, 80);
 
     //auto normal = generateNormalDistribution(100000, 50, 5, 40);
@@ -87,9 +103,6 @@ int main()
     //test();
     return 0;
 }
-
-
-
 
 
 
