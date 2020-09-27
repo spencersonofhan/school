@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <random>
@@ -48,9 +49,6 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
         uniformVector.push_back(dp);
     }
 
-    int test40 = 0;
-    int test41 = 0;
-
     for (int i = 0; i < howMany; i++)
     {
         auto genNum = distI(engine); // Technically don't need these two lines.
@@ -58,10 +56,6 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
         uniformVector[genNumBin].count++;
 
     }
-
-    std::cout << "Uniform Distribution\n" << std::endl;
-    std::cout << "40 and 41 occurences: " << test40 << " | " << test41 << std::endl;
-    std::cout << uniformVector[20].count << std::endl;
     return uniformVector;
 }
 
@@ -87,19 +81,50 @@ std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany,
 
 void plotDistribution(std::string title, const std::vector<DistributionPair>& distribution, const std::uint8_t maxPlotLineSize)
 {
-    std::cout << "OHYES";
+    std::cout << title << std::endl;
+
+    // get max digit count from the bins
+    // Code was inspired from these resources:
+    // - https://www.cprogramming.com/tutorial/iomanip.html
+    // - https://stackoverflow.com/questions/22648978/c-how-to-find-the-length-of-an-integer
+    int minBinWidth = 0;
+    int maxBinWidth = 0;
+    for (DistributionPair dp : distribution)
+    {
+        if (int length = std::to_string(dp.minValue).length(); length > minBinWidth)
+        {
+            minBinWidth = length;
+        }
+        if (int length = std::to_string(dp.maxValue).length(); length > maxBinWidth)
+        {
+            maxBinWidth = length;
+        }
+    }
+
+    for (int j = 0; j < distribution.size(); j++)
+    {
+        std::cout << "[";
+        std::cout << std::setw(minBinWidth) << std::right << distribution[j].minValue << ",";
+        std::cout << std::setw(maxBinWidth) << std::right << distribution[j].maxValue << "] : " << std::endl;
+        // std::cout << setw(maxPlotLineSize)
+    }
+
+
+
+
+
 }
 
 
 int main()
 {
-    auto uniform = generateUniformDistribution(100000, 0, 79, 40);
+    auto uniform = generateUniformDistribution(100000, 0, 181529, 40);
     for (int i = 0; i < uniform.size(); i++)
     {
         std::cout << "uniform[" << i << "]: min=" << uniform[i].minValue << " max=" << uniform[i].maxValue << std::endl;
     }
 
-    //plotDistribution("--- Uniform ---", uniform, 80);
+    plotDistribution("--- Uniform ---", uniform, 80);
 
     //auto normal = generateNormalDistribution(100000, 50, 5, 40);
     //plotDistribution("--- Normal ---", normal, 80);
