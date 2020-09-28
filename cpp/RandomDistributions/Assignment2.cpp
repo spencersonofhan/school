@@ -28,21 +28,22 @@ public:
     std::uint32_t count;
 };
 
+// Returns a vector that records the numbers generated with uniform_int_distribution given the function parameters
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins)
 {
     std::vector<DistributionPair> uniformVector;
-    std::random_device rd;
-    std::default_random_engine engine(rd());
+    std::random_device seed;
+    std::default_random_engine engine(seed());
     std::uniform_int_distribution<int> distI(min, max);
 
     // Make the DistributionPairs based off (max-min)/numberBins
     unsigned int binBoundaries = std::lround(static_cast<double>((max - min)) / numberBins);
-    std::cout << "binBoundaries: " << binBoundaries << std::endl;
 
     // Initialize the first bin and adds it to uniformVector
     DistributionPair bin0(min, (min + binBoundaries) - 1);
     uniformVector.push_back(bin0);
 
+    // Fill uniformVector with DistributionPair objects with correct bins
     for (int i = 1; i < numberBins; i++)
     {
         DistributionPair dp(min + (i*binBoundaries), min + ((i*binBoundaries) + (binBoundaries - 1)));
@@ -55,51 +56,91 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
     for (int i = 0; i < howMany; i++)
     {
         auto genNum = distI(engine);
-        if (genNum < lowestBinNum)
-        {
-            uniformVector[0].count++;
-            continue;
-        }
-        else if(genNum > highestBinNum)
-        {
-            uniformVector[uniformVector.size() - 1].count++;
-            continue;
-        }
-        auto genNumBin = genNum / binBoundaries;
+        auto genNumBin = std::floor(static_cast<double>(genNum - min) / binBoundaries);
         uniformVector[genNumBin].count++;
-
     }
+    
     return uniformVector;
 }
 
+// Returns a vector that records the numbers generated with normal_distribution given the function parameters
 std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, float mean, float stdev, std::uint8_t numberBins)
 {
-    std::cout << "big money1";
-    unsigned int test1 = 3;
-    unsigned int test2 = 5;
-    DistributionPair t = DistributionPair(test1, test2);
-    std::vector<DistributionPair> bigmoney = { t };
-    return bigmoney;
+    std::vector<DistributionPair> normalVector;
+    std::random_device seed;
+    std::default_random_engine engine(seed());
+    std::normal_distribution<float> distFloat(mean, stdev);
+
+
+    int minBin = mean - (4 * stdev);
+    int maxBin = mean + (4 * stdev) - 1;
+    int binBoundaries = std::round(static_cast<double>(maxBin - minBin) / numberBins);
+
+    // Fill normalVector with DistributionPair objects with correct bins
+    for (int i = 0; i < numberBins; i++)
+    {
+        DistributionPair dp(minBin + (i*binBoundaries), minBin + (i*binBoundaries) + (binBoundaries - 1));
+        normalVector.push_back(dp);
+    }
+
+    // Generate random numbers and correctly bin them
+    for (int i = 0; i < howMany; i++)
+    {
+        auto randNumber = distFloat(engine);
+        int bin =  std::floor((randNumber - minBin) / binBoundaries);
+
+        if (randNumber < minBin)
+        {
+            normalVector[0].count++;
+            continue;
+        }
+        else if(randNumber > maxBin)
+        {
+            normalVector[normalVector.size() - 1].count++;
+            continue;
+        }
+
+        normalVector[bin].count++;
+    }
+
+    return normalVector;
 }
 
+// Returns a vector that records the numbers generated with poisson_distribution given the function parameters
 std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany, std::uint8_t howOften, std::uint8_t numberBins)
 {
-    std::cout << "big money1";
-    unsigned int test1 = 3;
-    unsigned int test2 = 5;
-    DistributionPair t = DistributionPair(test1, test2);
-    std::vector<DistributionPair> bigmoney = { t };
-    return bigmoney;
+    std::vector<DistributionPair> poissonVector;
+    std::random_device seed;
+    std::default_random_engine engine(seed());
+    std::poisson_distribution<int> distInt(howOften);
+
+    // Fill poissonVector with DistributionPair objects with correct bins
+    for (int j = 0; j < numberBins; j++)
+    {
+        DistributionPair dp(j, j);
+        poissonVector.push_back(dp);
+    }
+
+    // Generate random numbers and correctly bin them
+    for (int i = 0; i < howMany; i++)
+    {
+        auto randNum = distInt(engine);
+        poissonVector[randNum].count++;
+    }
+
+    return poissonVector;
 }
 
 void plotDistribution(std::string title, const std::vector<DistributionPair>& distribution, const std::uint8_t maxPlotLineSize)
 {
     std::cout << title << std::endl;
 
-    // get max digit count from the bins
-    // Code was inspired from these resources:
-    // - https://www.cprogramming.com/tutorial/iomanip.html
-    // - https://stackoverflow.com/questions/22648978/c-how-to-find-the-length-of-an-integer
+    /*
+    First get the max digit count from bins
+    !code was inspired from these resources!
+    - https://www.cprogramming.com/tutorial/iomanip.html
+    - https://stackoverflow.com/questions/22648978/c-how-to-find-the-length-of-an-integer
+    */
     int mPLS = maxPlotLineSize;
     int minBinWidth = 0;
     int maxBinWidth = 0;
@@ -123,13 +164,16 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
         }
     }
 
-    // When plotting each DistributionPair, there will always be six characters that do not change from line to line
-    // ([,] : )
-    // I will subtract 6 plus minBinWidth plus maxBinWidth to get the remaining amount of character space I can plot
+    /*
+    When plotting each DistributionPair, there will always be six characters that do not change from line to line. ( [,]<space>:<space> )
+    I will subtract 6 (+1 too, I'm not entirely sure why but it does need it for proper output) + minBinWidth + maxBinWidth
+    from the maxPlotLineSize copied variable (mPLS) to get the remaining amount of character space I can plot
+    */
     mPLS -= (7 + minBinWidth + maxBinWidth);
     int starValue = maxCount / mPLS;
     char star = '*';
 
+    // Formats and plots each DistributionPair object's count data
     for (int j = 0; j < distribution.size(); j++)
     {
         int numOfStars = distribution[j].count / starValue;
@@ -138,40 +182,23 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
         std::cout << std::setw(maxBinWidth) << std::right << distribution[j].maxValue << "] : ";
         std::cout << std::setw(maxPlotLineSize) << std::left << std::string(numOfStars, star) << "(" << numOfStars << ")" << std::endl;
     }
-
-
-
-
-
 }
 
 
 int main()
 {
     auto uniform = generateUniformDistribution(100000, 0, 79, 40);
-    for (int i = 0; i < uniform.size(); i++)
-    {
-        std::cout << "uniform[" << i << "]: min=" << uniform[i].minValue << " max=" << uniform[i].maxValue << std::endl;
-    }
-
     plotDistribution("--- Uniform ---", uniform, 80);
 
-    //auto normal = generateNormalDistribution(100000, 50, 5, 40);
-    //plotDistribution("--- Normal ---", normal, 80);
+    auto normal = generateNormalDistribution(100000, 50, 5, 40);
+    plotDistribution("--- Normal ---", normal, 80);
 
-    //auto poisson = generatePoissonDistribution(100000, 6, 40);
-    //plotDistribution("--- Poisson ---", poisson, 80);
+    auto poisson = generatePoissonDistribution(100000, 6, 40);
+    plotDistribution("--- Poisson ---", poisson, 80);
 
-    //test();
+    test();
     return 0;
 }
-
-
-
-
-
-
-
 
 
 
