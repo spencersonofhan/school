@@ -49,9 +49,22 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
         uniformVector.push_back(dp);
     }
 
+    int lowestBinNum = uniformVector[0].minValue;
+    int highestBinNum = uniformVector[uniformVector.size() - 1].maxValue;
+
     for (int i = 0; i < howMany; i++)
     {
-        auto genNum = distI(engine); // Technically don't need these two lines.
+        auto genNum = distI(engine);
+        if (genNum < lowestBinNum)
+        {
+            uniformVector[0].count++;
+            continue;
+        }
+        else if(genNum > highestBinNum)
+        {
+            uniformVector[uniformVector.size() - 1].count++;
+            continue;
+        }
         auto genNumBin = genNum / binBoundaries;
         uniformVector[genNumBin].count++;
 
@@ -87,26 +100,43 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
     // Code was inspired from these resources:
     // - https://www.cprogramming.com/tutorial/iomanip.html
     // - https://stackoverflow.com/questions/22648978/c-how-to-find-the-length-of-an-integer
+    int mPLS = maxPlotLineSize;
     int minBinWidth = 0;
     int maxBinWidth = 0;
+    int maxCount = 0;
+
     for (DistributionPair dp : distribution)
     {
+        if (maxCount < dp.count)
+        {
+            maxCount = dp.count;
+        }
+        // Turns the dp.minValue into a string to find the amount of digits
         if (int length = std::to_string(dp.minValue).length(); length > minBinWidth)
         {
             minBinWidth = length;
         }
+        // Identical to above block except with maxValue
         if (int length = std::to_string(dp.maxValue).length(); length > maxBinWidth)
         {
             maxBinWidth = length;
         }
     }
 
+    // When plotting each DistributionPair, there will always be six characters that do not change from line to line
+    // ([,] : )
+    // I will subtract 6 plus minBinWidth plus maxBinWidth to get the remaining amount of character space I can plot
+    mPLS -= (7 + minBinWidth + maxBinWidth);
+    int starValue = maxCount / mPLS;
+    char star = '*';
+
     for (int j = 0; j < distribution.size(); j++)
     {
+        int numOfStars = distribution[j].count / starValue;
         std::cout << "[";
         std::cout << std::setw(minBinWidth) << std::right << distribution[j].minValue << ",";
-        std::cout << std::setw(maxBinWidth) << std::right << distribution[j].maxValue << "] : " << std::endl;
-        // std::cout << setw(maxPlotLineSize)
+        std::cout << std::setw(maxBinWidth) << std::right << distribution[j].maxValue << "] : ";
+        std::cout << std::setw(maxPlotLineSize) << std::left << std::string(numOfStars, star) << "(" << numOfStars << ")" << std::endl;
     }
 
 
@@ -118,7 +148,7 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
 
 int main()
 {
-    auto uniform = generateUniformDistribution(100000, 0, 181529, 40);
+    auto uniform = generateUniformDistribution(100000, 0, 79, 40);
     for (int i = 0; i < uniform.size(); i++)
     {
         std::cout << "uniform[" << i << "]: min=" << uniform[i].minValue << " max=" << uniform[i].maxValue << std::endl;
