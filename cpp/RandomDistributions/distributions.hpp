@@ -1,3 +1,12 @@
+#pragma once
+
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <string>
+#include <vector>
+
 class DistributionPair;
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins);
 std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, float mean, float stdev, std::uint8_t numberBins);

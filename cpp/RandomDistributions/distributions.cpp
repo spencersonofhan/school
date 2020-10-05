@@ -1,3 +1,5 @@
+#include "utilities.hpp"
+
 // Returns a vector that records the numbers generated with uniform_int_distribution given the function parameters
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins)
 {
