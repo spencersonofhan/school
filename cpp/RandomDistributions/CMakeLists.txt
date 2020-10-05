@@ -5,14 +5,13 @@ set(HEADER_FILES distributions.hpp)
 set(SOURCE_FILES distributions.cpp)
 set(UNIT_TEST_FILES TestDistributions.cpp)
 
-add_executable(GoogleTestIntro ${HEADER_FILES} ${SOURCE_FILES} main.cpp)
+add_executable(RandDistributions ${HEADER_FILES} ${SOURCE_FILES} main.cpp)
 add_executable(UnitTestRunner ${HEADER_FILES} ${SOURCE_FILES} ${UNIT_TEST_FILES})
 
-set_property(TARGET GoogleTestIntro PROPERTY CXX_STANDARD 17)
+set_property(TARGET RandDistributions PROPERTY CXX_STANDARD 17)
 set_property(TARGET UnitTestRunner PROPERTY CXX_STANDARD 17)
 
 find_program(CLANG_FORMAT "clang-format")
-
 if (CLANG_FORMAT)
     message("Clang-Format found at: " ${CLANG_FORMAT})
 
@@ -32,10 +31,13 @@ endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_options(RandDistributions PRIVATE /W4 /permissive-)
+    target_compile_options(UnitTestRunner PRIVATE /W4 /permissive-)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(RandDistributions PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(UnitTestRunner PRIVATE -Wall -Wextra -pedantic)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLANG")
     target_compile_options(RandDistributions PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(UnitTestRunner PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 

@@ -1,4 +1,4 @@
-#include "utilities.hpp"
+#include "distributions.hpp"
 
 // Returns a vector that records the numbers generated with uniform_int_distribution given the function parameters
 std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany, std::uint32_t min, std::uint32_t max, std::uint8_t numberBins)
@@ -22,10 +22,7 @@ std::vector<DistributionPair> generateUniformDistribution(std::uint32_t howMany,
         uniformVector.push_back(dp);
     }
 
-    int lowestBinNum = uniformVector[0].minValue;
-    int highestBinNum = uniformVector[uniformVector.size() - 1].maxValue;
-
-    for (int i = 0; i < howMany; i++)
+    for (std::uint32_t i = 0; i < howMany; i++)
     {
         auto genNum = distI(engine);
         auto genNumBin = std::floor(static_cast<double>(genNum - min) / binBoundaries);
@@ -55,7 +52,7 @@ std::vector<DistributionPair> generateNormalDistribution(std::uint32_t howMany, 
     }
 
     // Generate random numbers and correctly bin them
-    for (int i = 0; i < howMany; i++)
+    for (std::uint32_t i = 0; i < howMany; i++)
     {
         auto randNumber = distFloat(engine);
         int bin = std::floor((randNumber - minBin) / binBoundaries);
@@ -93,7 +90,7 @@ std::vector<DistributionPair> generatePoissonDistribution(std::uint32_t howMany,
     }
 
     // Generate random numbers and correctly bin them
-    for (int i = 0; i < howMany; i++)
+    for (std::uint32_t i = 0; i < howMany; i++)
     {
         auto randNum = distInt(engine);
         poissonVector[randNum].count++;
@@ -112,10 +109,10 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
     - https://www.cprogramming.com/tutorial/iomanip.html
     - https://stackoverflow.com/questions/22648978/c-how-to-find-the-length-of-an-integer
     */
-    int mPLS = maxPlotLineSize;
-    int minBinWidth = 0;
-    int maxBinWidth = 0;
-    int maxCount = 0;
+    auto mPLS = maxPlotLineSize;
+    std::uint32_t minBinWidth = 0;
+    std::uint32_t maxBinWidth = 0;
+    std::uint32_t maxCount = 0;
 
     for (DistributionPair dp : distribution)
     {
@@ -124,12 +121,13 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
             maxCount = dp.count;
         }
         // Turns the dp.minValue into a string to find the amount of digits
-        if (int length = std::to_string(dp.minValue).length(); length > minBinWidth)
+        std::uint32_t length = std::to_string(dp.minValue).length();
+        if (length > minBinWidth)
         {
             minBinWidth = length;
         }
         // Identical to above block except with maxValue
-        if (int length = std::to_string(dp.maxValue).length(); length > maxBinWidth)
+        if (length > maxBinWidth)
         {
             maxBinWidth = length;
         }
@@ -145,7 +143,7 @@ void plotDistribution(std::string title, const std::vector<DistributionPair>& di
     char star = '*';
 
     // Formats and plots each DistributionPair object's count data
-    for (int j = 0; j < distribution.size(); j++)
+    for (std::uint32_t j = 0; j < distribution.size(); j++)
     {
         int numOfStars = distribution[j].count / starValue;
         std::cout << "[";
