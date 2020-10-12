@@ -1,0 +1,1 @@
+This assignments' task is performing an evaluation of the relative performance of three different array types in C++ (raw arrays, std::array, std::vector). Secondly is to get familiar with the <chrono> library.
