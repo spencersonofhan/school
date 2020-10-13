@@ -4,9 +4,10 @@ void printOutTimes(std::string, std::array<std::chrono::milliseconds, 5>);
 std::chrono::milliseconds copyAndSort(const SourceArray&);
 std::chrono::milliseconds copyAndSortRaw(const SourceArray&);
 
+// Simple copy to raw array from std::array by iteration
 void initializeRawArrayFromStdArray(const std::array<int, HOW_MANY_ELEMENTS>& source, int dest[])
 {
-    for(std::uint32_t i = 0; i < source.max_size(); i++)
+    for (std::uint32_t i = 0; i < source.max_size(); i++)
     {
         dest[i] = source[i];
     }
@@ -15,10 +16,10 @@ void initializeRawArrayFromStdArray(const std::array<int, HOW_MANY_ELEMENTS>& so
 // Organ pipe (Copy first half to second then reverse the second half)
 void organPipeStdArray(std::array<int, HOW_MANY_ELEMENTS>& data)
 {
-    int orgPipMax = data.max_size();
-    int orgPipHalf = (orgPipMax / 2);
+    auto orgPipMax = data.max_size();
+    auto orgPipHalf = (orgPipMax / 2);
 
-    for (std::uint32_t i = orgPipHalf; i < orgPipMax; i++)
+    for (decltype(orgPipMax) i = orgPipHalf; i < orgPipMax; i++)
     {
         data[i] = data[i - orgPipHalf];
     }
@@ -27,7 +28,7 @@ void organPipeStdArray(std::array<int, HOW_MANY_ELEMENTS>& data)
 
 void evaluateRawArray(const SourceArray& random, const SourceArray& sorted, const SourceArray& reversed, const SourceArray& organPipe, const SourceArray& rotated)
 {
-    // Arrays to hold the SourceArray parameters and the total sort time for each array type
+    // totalTimeArray will hold each type of arrays' sort times.
     std::array<std::chrono::milliseconds, 5> totalTimeArray;
 
     totalTimeArray[0] = copyAndSortRaw(random);
@@ -40,6 +41,7 @@ void evaluateRawArray(const SourceArray& random, const SourceArray& sorted, cons
 
 void evaluateStdArray(const SourceArray& random, const SourceArray& sorted, const SourceArray& reversed, const SourceArray& organPipe, const SourceArray& rotated)
 {
+    // totalTimeArray will hold each type of arrays' sort times.
     std::array<std::chrono::milliseconds, 5> totalTimeArray;
 
     totalTimeArray[0] = copyAndSort(random);
@@ -52,6 +54,7 @@ void evaluateStdArray(const SourceArray& random, const SourceArray& sorted, cons
 
 void evaluateStdVector(const SourceArray& random, const SourceArray& sorted, const SourceArray& reversed, const SourceArray& organPipe, const SourceArray& rotated)
 {
+    // totalTimeArray will hold each type of arrays' sort times.
     std::array<std::chrono::milliseconds, 5> totalTimeArray;
 
     totalTimeArray[0] = copyAndSort(random);
@@ -62,16 +65,18 @@ void evaluateStdVector(const SourceArray& random, const SourceArray& sorted, con
     printOutTimes("std::vector", totalTimeArray);
 }
 
-void printOutTimes(std::string name, std::array<std::chrono::milliseconds, 5> data)
+// Prints out the totatTimeArray in accordance with the sample output on the assignments' Canvas page
+void printOutTimes(std::string name, std::array<std::chrono::milliseconds, 5> totalTimeArray)
 {
     std::cout << "\n --- " << name << " Performance ---" << std::endl;
-    for (uint32_t i = 0; i < data.max_size(); i++)
+    for (uint32_t i = 0; i < totalTimeArray.max_size(); i++)
     {
         std::cout << std::setw(PRINTOUT_WIDTH) << std::left << PRE_SORT_NAMES[i]
-        << " : " << data[i].count() << " ms" << std::endl;
+                  << " : " << totalTimeArray[i].count() << " ms" << std::endl;
     }
 }
 
+// Helper function that copies and sorts the arrayCopy HOW_MANY_TIMES times
 std::chrono::milliseconds copyAndSort(const SourceArray& arrayCopy)
 {
     std::chrono::milliseconds totalTime(0);
@@ -87,6 +92,7 @@ std::chrono::milliseconds copyAndSort(const SourceArray& arrayCopy)
     return totalTime;
 }
 
+// Accomplishes the same goal as copyAndSort but with primitive arrays
 std::chrono::milliseconds copyAndSortRaw(const SourceArray& arrayCopy)
 {
     std::chrono::milliseconds totalTime(0);
