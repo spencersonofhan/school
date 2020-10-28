@@ -1,6 +1,5 @@
 #include "WordTree.hpp"
 
-std::shared_ptr<WordTree> readDictionary(std::string filename);
 
 void WordTree::add(std::string word)
 {
@@ -13,7 +12,9 @@ void WordTree::add(std::string word)
         currNode = newNode;
         if (word.length() == 1)
         {
-            roots[word[0]]->isEndOfWord();
+            roots[getFixedASCII(word[0])]->isEndOfWord();
+            sizeAddOne();
+            return;
         }
     }
 
@@ -26,11 +27,11 @@ void WordTree::add(std::string word)
         {
             auto newNode = std::make_shared<TreeNode>();
             parent->children[getFixedASCII(word[i])] = newNode;
-            std::cout << word[i] << std::endl;
             currNode = newNode;
         }
     }
     currNode->isEndOfWord();
+    sizeAddOne();
 }
 
 bool WordTree::find(std::string word)
@@ -69,11 +70,6 @@ std::vector<std::string> WordTree::predict(std::string partial, std::uint8_t how
     return yawyeet;
 }
 
-std::size_t WordTree::size()
-{
-    return 1;
-}
-
 char WordTree::getLetter(std::uint8_t letterNum){
     return alphabet[letterNum];
 }
@@ -82,15 +78,14 @@ int WordTree::getFixedASCII(char letterNum) {
     return int(letterNum) - 97;
 }
 
-bool nullNodeCheck(std::shared_ptr<TreeNode> currNode) {
-    if (currNode != NULL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+std::size_t WordTree::size()
+{
+    return treeSize;
+}
+
+void WordTree::sizeAddOne()
+{
+    treeSize++;
 }
 
 
@@ -102,6 +97,7 @@ std::shared_ptr<WordTree> readDictionary(std::string filename)
     while (!inFile.eof())
     {
         std::string word;
+
         std::getline(inFile, word);
         // Need to consume the carriage return character for some systems, if it exists
         if (!word.empty() && word[word.size() - 1] == '\r')

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(TypeAhead)
 
-set(HEADER_FILES WordTree.hpp)
+set(HEADER_FILES WordTree.hpp rlutil.h)
 set(SOURCE_FILES WordTree.cpp)
 set(UNIT_TEST_FILES TestWordTree.cpp)
 
