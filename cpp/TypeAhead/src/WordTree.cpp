@@ -112,6 +112,5 @@ std::shared_ptr<WordTree> readDictionary(std::string filename)
             wordTree->add(word);
         }
     }
-
     return wordTree;
 }
