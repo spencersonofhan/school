@@ -1,0 +1,4 @@
+*.txt
+_clang-format
+/build
+/lbuild
