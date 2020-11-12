@@ -15,9 +15,43 @@ int main() {
 	std::shared_ptr<LifeSimulator> lifeSim = std::make_shared<LifeSimulator>(*(new LifeSimulator(rows, cols)));
 	std::shared_ptr<RendererConsole> rConsole = std::make_shared<RendererConsole>(*(new RendererConsole()));
 
+	// Insert the patterns
 	PatternAcorn acorn;
-	lifeSim->insertPattern(acorn, 1, 1);
+	lifeSim->insertPattern(acorn, 50, 5);
+
+	// for(uint8_t y = 0; y < 150; y++)
+	// {
+	//     for (uint8_t x = 0; x < 150; x++)
+	//     {
+	//         if(lifeSim->getCell(x, y))
+	//         {
+	//             std::cout << "X: " << static_cast<int>(x) << " Y: " << static_cast<int>(y) << std::endl;
+	//         }
+	//     }
+	// }
+
+	// First rendering
+	// rlutil::cls();
+	// rConsole->render(*lifeSim);
+	// std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	lifeSim->update();
+	// rConsole->render(*lifeSim);
+	// std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	// lifeSim->update();
+	// rConsole->render(*lifeSim);
+
+	// Steps of evolution
+	// for(uint8_t step = 0; step < 255; step++)
+	// {
+	// 	lifeSim->update();
+	// 	rConsole->render(*lifeSim);
+	// 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	// }
+
+
+
 
 	// std::cout << lifeSim->getCell(30, 120) << std::endl;
 
