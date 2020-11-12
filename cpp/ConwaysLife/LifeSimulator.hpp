@@ -1,14 +1,16 @@
 #pragma once
 
 #include "Pattern.hpp"
+#include "PatternAcorn.hpp"
+#include "PatternBlock.hpp"
+#include "PatternBlinker.hpp"
+#include "PatternGlider.hpp"
+#include "PatternGosperGliderGun.hpp"
 
 #include <cstdint>
 #include <vector>
 #include <iostream>
 #include <memory>
-#include <algorithm>
-#include <iterator>
-
 
 class LifeSimulator
 {

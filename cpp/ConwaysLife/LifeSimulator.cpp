@@ -8,11 +8,19 @@ LifeSimulator::LifeSimulator(std::uint8_t sizeX, std::uint8_t sizeY)
     LifeSimulator::X = sizeX;
     LifeSimulator::Y = sizeY;
 
-    std::vector<std::vector<bool>> y;
+    fill2DV(theGrid, X, Y);
 
-    fill2DV(y, X, Y);
-
-    theGrid = y;
+    // Insert the patterns (seed)
+	PatternAcorn acorn;
+	PatternBlock block;
+	PatternBlinker blinker;
+	PatternGlider glider;
+	PatternGosperGliderGun pggg;
+	insertPattern(pggg, 45, 19);
+	insertPattern(block, 80, 8);
+	insertPattern(blinker, 3, 14);
+    insertPattern(glider, 0, 0);
+	insertPattern(acorn, 60, 10);
 }
 
 void LifeSimulator::insertPattern(const Pattern& pattern, std::uint8_t startX, std::uint8_t startY)
@@ -25,7 +33,7 @@ void LifeSimulator::insertPattern(const Pattern& pattern, std::uint8_t startX, s
         if(startY + y >= Y) {break;}
         for (decltype(pX) x = 0; x < pX; x++)
         {
-            // Check if it goes beyond boundaries
+            // Check if beyond boundaries
             if(startX + x >= X) {break;}
             theGrid[startY+y][startX+x] = pattern.getCell(x, y);
         }
