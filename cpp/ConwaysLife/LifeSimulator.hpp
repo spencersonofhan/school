@@ -19,10 +19,7 @@ class LifeSimulator
         std::uint8_t getSizeX() const;
         std::uint8_t getSizeY() const;
         bool getCell(std::uint8_t x, std::uint8_t y) const;
-
-        // !!DELETE THIS BEFORE TURNING IN!!!
-        std::vector<std::vector<bool>>& getGrid() { return theGrid; }
-
+        
     private:
         std::uint8_t X;
         std::uint8_t Y;

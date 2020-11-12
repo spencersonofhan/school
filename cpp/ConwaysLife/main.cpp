@@ -17,6 +17,10 @@ int main() {
 
 	PatternAcorn acorn;
 	lifeSim->insertPattern(acorn, 1, 1);
+	lifeSim->update();
+
+	// std::cout << lifeSim->getCell(30, 120) << std::endl;
+
 
 	// for (uint8_t i = 0; i < 10; i++)
 	// {
