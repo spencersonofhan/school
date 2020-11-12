@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstdint>
-
 #include "LifeSimulator.hpp"
+
+#include <cstdint>
 
 class Renderer
 {
-    public:
-        virtual void render(const LifeSimulator& simulation) = 0;
+  public:
+    virtual void render(const LifeSimulator& simulation) = 0;
 };

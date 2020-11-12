@@ -2,7 +2,7 @@
 
 bool PatternAcorn::getCell(std::uint8_t x, std::uint8_t y) const
 {
-    switch(y)
+    switch (y)
     {
         case 0:
             if (x == 1)
@@ -17,15 +17,19 @@ bool PatternAcorn::getCell(std::uint8_t x, std::uint8_t y) const
             }
             return false;
         case 2:
-            switch(x)
+            switch (x)
             {
-                case 0: [[fallthrough]];
-                case 1: [[fallthrough]];
-                case 4: [[fallthrough]];
-                case 5: [[fallthrough]];
+                case 0:
+                    [[fallthrough]];
+                case 1:
+                    [[fallthrough]];
+                case 4:
+                    [[fallthrough]];
+                case 5:
+                    [[fallthrough]];
                 case 6:
                     return true;
-                return false;
+                    return false;
             }
             return false;
         default:

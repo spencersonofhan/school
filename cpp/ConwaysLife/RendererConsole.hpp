@@ -3,6 +3,6 @@
 
 class RendererConsole : public Renderer
 {
-    public:
-        virtual void render(const LifeSimulator& simulation) override;
+  public:
+    virtual void render(const LifeSimulator& simulation) override;
 };

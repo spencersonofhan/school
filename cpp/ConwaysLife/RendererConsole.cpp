@@ -6,9 +6,9 @@ void RendererConsole::render(const LifeSimulator& simulation)
     uint8_t offsetY = 1;
     rlutil::cls();
     rlutil::hidecursor();
-    for(uint8_t y = 0; y < simulation.getSizeY(); y++)
+    for (uint8_t y = 0; y < simulation.getSizeY(); y++)
     {
-        for(uint8_t x = 0; x < simulation.getSizeX(); x++)
+        for (uint8_t x = 0; x < simulation.getSizeX(); x++)
         {
             if (simulation.getCell(x, y))
             {
