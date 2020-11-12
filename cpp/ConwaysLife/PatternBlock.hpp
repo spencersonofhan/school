@@ -10,8 +10,6 @@ class PatternBlock : public Pattern
         virtual bool getCell(std::uint8_t x, std::uint8_t y) const;
 
     private:
-        // std::uint8_t sizeX = 2;
-        // std::uint8_t sizeY = 2;
         std::uint8_t sizeX = 2;
         std::uint8_t sizeY = 2;
 };
