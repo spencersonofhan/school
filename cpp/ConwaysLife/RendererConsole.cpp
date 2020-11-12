@@ -2,6 +2,7 @@
 
 void RendererConsole::render(const LifeSimulator& simulation)
 {
+    uint8_t offset = 2;
     rlutil::cls();
     rlutil::hidecursor();
     for(uint8_t y = 0; y < simulation.getSizeY(); y++)
@@ -10,11 +11,11 @@ void RendererConsole::render(const LifeSimulator& simulation)
         {
             if (simulation.getCell(x, y))
             {
-                rlutil::locate(1 + x, y);
+                rlutil::locate(offset + x, offset + y);
                 rlutil::setChar('X');
             }
         }
     }
     rlutil::locate(simulation.getSizeX(), simulation.getSizeY());
-    rlutil::showcursor();
+    std::cout << std::flush;
 }
