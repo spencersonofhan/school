@@ -1,6 +1,7 @@
 #include "LifeSimulator.hpp"
 
 void fill2DV(std::vector<std::vector<bool>>& grid, std::uint8_t x, std::uint8_t y);
+void fill2DV(std::vector<std::vector<bool>>& newGrid, std::vector<std::vector<bool>>& theGrid, std::uint8_t nX, std::uint8_t nY);
 
 LifeSimulator::LifeSimulator(std::uint8_t sizeX, std::uint8_t sizeY)
 {
@@ -23,36 +24,23 @@ void LifeSimulator::insertPattern(const Pattern& pattern, std::uint8_t startX, s
     {
         for (decltype(pX) x = 0; x < pX; x++)
         {
-            if(pattern.getCell(x, y))
-            {
-                std::cout << "X: " << static_cast<int>(startX + x) << " Y: " << static_cast<int>(startY + y) << std::endl;
-            }
-
             theGrid[startY+y][startX+x] = pattern.getCell(x, y);
-            if(pattern.getCell(x, y))
-            {
-                std::cout << "SHOULD BE 1 -> " << theGrid[startY+y][startX+x] << std::endl;
-            }
-
         }
     }
-    std::cout << std::endl;
 }
 
 void LifeSimulator::update()
 {
-    // Create 2D bool vector for new cells to be copied too
-    std::cout << theGrid[5][51] << std::endl;
-    std::vector<std::vector<bool>> newGrid = theGrid;
-    std::cout << theGrid[5][51] << std::endl;
-    std::cout << newGrid[5][51] << std::endl;
+    // create 2D bool vector for new cells to be copied too
+    std::vector<std::vector<bool>> newGrid;
+    fill2DV(newGrid, theGrid, X, Y);
 
-    // fill2DV(newGrid, X, Y);
     uint8_t neighbors;
     bool topBoundary = false;
     bool rightBoundary = false;
     bool bottomBoundary = false;
     bool leftBoundary = false;
+
     // loop checks if cell is alive, then will check its surrounding cells
     for (uint8_t y = 0; y < Y; y++)
     {
@@ -91,6 +79,7 @@ void LifeSimulator::update()
                     if(getCell(x, nY)) { neighbors++; }
                 }
             }
+
             // Implement game rules for cells to live
             switch(neighbors)
             {
@@ -129,9 +118,34 @@ bool LifeSimulator::getCell(std::uint8_t x, std::uint8_t y) const
 
 void fill2DV(std::vector<std::vector<bool>>& grid, std::uint8_t nX, std::uint8_t nY)
 {
-    for (uint8_t i = 0; i < nY; i++)
+    for(uint8_t i = 0; i < nY; i++)
 	{
         std::vector<bool> x(nX);
 		grid.push_back(x);
 	}
+}
+
+// Overloaded for making a copy of theGrid
+void fill2DV(std::vector<std::vector<bool>>& newGrid, std::vector<std::vector<bool>>& theGrid, std::uint8_t nX, std::uint8_t nY)
+{
+    for(uint8_t y = 0; y < nY; y++)
+	{
+        std::vector<bool> row(nX);
+        for(uint8_t x = 0; x < nX; x++)
+        {
+            row[x] = theGrid[y][x];
+        }
+		newGrid.push_back(row);
+	}
+
+
+    // for(uint8_t y = 0; y < nY; y++)
+	// {
+    //     std::vector<bool> row(nX);
+    //     for(uint8_t x = 0; x < nX; x++)
+    //     {
+    //         row[x] = theGrid[y][x];
+    //     }
+	// 	newGrid.push_back(row);
+	// }
 }

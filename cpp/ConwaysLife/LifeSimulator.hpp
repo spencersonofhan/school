@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <algorithm>
+#include <iterator>
 
 
 class LifeSimulator
@@ -19,7 +21,7 @@ class LifeSimulator
         std::uint8_t getSizeX() const;
         std::uint8_t getSizeY() const;
         bool getCell(std::uint8_t x, std::uint8_t y) const;
-        
+
     private:
         std::uint8_t X;
         std::uint8_t Y;

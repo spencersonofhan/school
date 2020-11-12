@@ -15,11 +15,6 @@ void RendererConsole::render(const LifeSimulator& simulation)
             }
         }
     }
+    rlutil::locate(simulation.getSizeX(), simulation.getSizeY());
     rlutil::showcursor();
 }
-
-// void RendererConsole::printThis(char letter, int yCoord)
-// {
-//     // rlutil::locate(1, yCoord);
-//     // rlutil::setChar(letter);
-// }
