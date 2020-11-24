@@ -1,13 +1,10 @@
 #include <iomanip>
 #include <cstdint>
 #include <ratio>
-#include <array>
-#include <iostream>
-#include <memory>
 
 namespace usu
 {
-    template <typename T, typename R = std::uint64_t>
+    template <typename T, typename R = uint64_t>
     class weight
     {
     public:
@@ -26,6 +23,9 @@ namespace usu
             m_storage = weightVariable;
         }
 
+        weight<T, R> operator+(const weight<T, R> rhs);
+        weight<T, R> operator-(const weight<T, R> rhs);
+
         R count() { return m_storage; }
     };
 
@@ -43,6 +43,38 @@ namespace usu
         T newWeight(newStorage);
 
         return newWeight;
+    }
+
+    // + operator overload
+    template <typename T, typename R>
+    weight<T, R> weight<T, R>::operator+(const weight<T, R> rhs)
+    {
+        weight<T, R> newStorage(this->m_storage + rhs.m_storage);
+        return newStorage;
+    }
+
+    // - operator overload
+    template <typename T, typename R>
+    weight<T, R> weight<T, R>::operator-(const weight<T, R> rhs)
+    {
+        weight<T, R> newStorage(this->m_storage - rhs.m_storage);
+        return newStorage;
+    }
+
+
+    // * operator overload (both positions)
+    template <typename T, typename R, typename D>
+    weight<T, R> operator*(D scalar, const weight<T, R>& rhs)
+    {
+        weight<T, R> newStorage(rhs.m_storage * scalar);
+        return newStorage;
+    }
+
+    template <typename T, typename R, typename D>
+    weight<T, R> operator*(const weight<T, R>& lhs, D scalar)
+    {
+        weight<T, R> newStorage(lhs.m_storage * scalar);
+        return newStorage;
     }
 
     using microgram = weight<std::ratio<1000000, 1>>;
