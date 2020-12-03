@@ -3,5 +3,8 @@
 *.sln
 *.zip
 *.sln
-/build
-/gbuild
+*.txt
+*.in
+build/
+gbuild/
+lbuild/

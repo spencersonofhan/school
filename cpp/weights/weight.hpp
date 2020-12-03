@@ -36,8 +36,8 @@ namespace usu
         std::uint64_t currNum = castFrom.num;
         std::uint64_t currDen = castFrom.den;
 
-        double grams = (currStorage * currDen) / currNum;
-        auto newStorage = (grams * T::num) / T::den;
+        auto grams = (currStorage * currDen) / currNum;
+        auto newStorage = (static_cast<double>(grams) * T::num) / T::den;
 
 
         T newWeight(newStorage);
@@ -45,7 +45,7 @@ namespace usu
         return newWeight;
     }
 
-    // + operator overload
+    // + Operator overload
     template <typename T, typename R>
     weight<T, R> weight<T, R>::operator+(const weight<T, R> rhs)
     {
@@ -53,7 +53,7 @@ namespace usu
         return newStorage;
     }
 
-    // - operator overload
+    // - Operator overload
     template <typename T, typename R>
     weight<T, R> weight<T, R>::operator-(const weight<T, R> rhs)
     {
@@ -62,7 +62,7 @@ namespace usu
     }
 
 
-    // * operator overload (both positions)
+    // * Operator overload (scalar on left)
     template <typename T, typename R, typename D>
     weight<T, R> operator*(D scalar, const weight<T, R>& rhs)
     {
@@ -70,6 +70,7 @@ namespace usu
         return newStorage;
     }
 
+    // (scalar on right)
     template <typename T, typename R, typename D>
     weight<T, R> operator*(const weight<T, R>& lhs, D scalar)
     {
@@ -77,6 +78,7 @@ namespace usu
         return newStorage;
     }
 
+    // Type aliases
     using microgram = weight<std::ratio<1000000, 1>>;
     using gram = weight<std::ratio<1, 1>>;
     using kilogram = weight<std::ratio<1000, 1>>;

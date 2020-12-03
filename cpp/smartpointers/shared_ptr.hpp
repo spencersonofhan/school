@@ -1,17 +1,15 @@
-#include <iomanip>
 #include <cstdint>
-#include <iostream>
-#include <array>
+#include <iomanip>
 #include <stdexcept>
-
-
 
 namespace usu
 {
+    // shared_ptr class
     template <typename T>
     class shared_ptr
     {
-    public:
+      public:
+        shared_ptr();
         shared_ptr(T* point);
         ~shared_ptr();
         shared_ptr(shared_ptr<T>& copy);
@@ -24,19 +22,24 @@ namespace usu
         std::uint32_t use_count();
         std::uint32_t* getRefCount();
 
-
-    private:
+      private:
         T* pointer;
         std::uint32_t* refCount;
     };
 
+    // Default constructor
+    template <typename T>
+    shared_ptr<T>::shared_ptr()
+    {
+        refCount = new std::uint32_t(1);
+    }
 
     // Overloaded constructor
     template <typename T>
-    shared_ptr<T>::shared_ptr(T* point)
+    shared_ptr<T>::shared_ptr(T* point) :
+        shared_ptr()
     {
         pointer = point;
-        refCount = new std::uint32_t(1);
     }
 
     // Destructor
@@ -44,9 +47,8 @@ namespace usu
     shared_ptr<T>::~shared_ptr()
     {
         (*refCount)--;
-        if(*refCount == 0)
+        if (*refCount == 0)
         {
-            // delete[] *pointer;
             delete[] refCount;
             pointer = NULL;
             refCount = NULL;
@@ -57,8 +59,6 @@ namespace usu
     template <typename T>
     shared_ptr<T>::shared_ptr(shared_ptr<T>& copy)
     {
-        std::cout << "COPYCOP IN EFFECT" << std::endl;
-
         pointer = copy.pointer;
         refCount = copy.refCount;
         (*refCount)++;
@@ -89,6 +89,8 @@ namespace usu
     {
         pointer = rhs.pointer;
         refCount = rhs.refCount;
+        (*refCount)++;
+
         return *this;
     }
 
@@ -115,41 +117,95 @@ namespace usu
 
     // Getters/Setters
     template <typename T>
-    uint32_t shared_ptr<T>::use_count(){return *refCount;}
+    uint32_t shared_ptr<T>::use_count() { return *refCount; }
 
     template <typename T>
-    uint32_t* shared_ptr<T>::getRefCount(){return refCount;}
+    uint32_t* shared_ptr<T>::getRefCount() { return refCount; }
 
-
-
-    template<typename T>
+    // shared_ptr class to raw array
+    template <typename T>
     class shared_ptr<T[]>
     {
-    public:
-        shared_ptr(T* array, unsigned int elements)
+      public:
+        // Default constructor
+        shared_ptr()
+        {
+            refCount = new std::uint32_t(1);
+        }
+
+        // Overloaded constructor
+        shared_ptr(T* array, unsigned int elements) :
+            shared_ptr()
         {
             arrayPoint = array;
-            refCount = new std::uint32_t(1);
             elementsNum = elements;
         }
 
+        // Destructor
         ~shared_ptr()
         {
             (*refCount)--;
-            if(*refCount == 0)
+            if (*refCount == 0)
             {
                 delete[] arrayPoint;
                 delete[] refCount;
             }
         }
 
-        T operator[](unsigned int index)
+        // Copy constructor
+        shared_ptr(shared_ptr<T[]>& copy)
         {
-            if(index > elementsNum)
+            arrayPoint = copy.arrayPoint;
+            refCount = copy.refCount;
+            elementsNum = copy.elementsNum;
+            (*refCount)++;
+        }
+
+        // Move constructor
+        shared_ptr(shared_ptr<T[]>&& move)
+        {
+            arrayPoint = move.pointer;
+            refCount = move.refCount;
+            elementsNum = move.elementsNum;
+        }
+
+        // Assignment operator overload
+        shared_ptr<T>& operator=(shared_ptr<T[]>& rhs)
+        {
+            (*refCount)--;
+            arrayPoint = rhs.arrayPointpointer;
+            refCount = rhs.refCount;
+            elementsNum = rhs.elementsNum;
+            (*refCount)++;
+            return *this;
+        }
+
+        // Move assignment operator overload
+        shared_ptr<T>& operator=(shared_ptr<T>&& rhs)
+        {
+            arrayPoint = rhs.arrayPointpointer;
+            refCount = rhs.refCount;
+            elementsNum = rhs.elementsNum;
+            return *this;
+        }
+
+        // Index access operator overload (read only)
+        T operator[](unsigned int index) const
+        {
+            if (index > elementsNum)
             {
                 throw std::out_of_range("Index exceeds total number of elements");
             }
-            // T temp =
+            return arrayPoint[index];
+        }
+
+        // Index access operator overload (write only)
+        T& operator[](unsigned int index)
+        {
+            if (index > elementsNum)
+            {
+                throw std::out_of_range("Index exceeds total number of elements");
+            }
             return arrayPoint[index];
         }
 
@@ -158,7 +214,7 @@ namespace usu
             return elementsNum;
         }
 
-    private:
+      private:
         T* arrayPoint;
         std::uint32_t* refCount;
         unsigned int elementsNum;
@@ -177,4 +233,4 @@ namespace usu
     {
         return shared_ptr<T[]>(new T[N], N);
     }
-}
+} // namespace usu
