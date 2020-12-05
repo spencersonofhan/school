@@ -80,20 +80,20 @@ namespace usu
         {
             numElements++;
 
-            // This is only for the priority queue at the beginning
-            if (numElements >= capacity())
-            {
-                beginCheck();
-            }
-
-            /*
-            while loop beats std::vector to the punch with resizing first since
-            std::vectors size doubles automagically if elements equals half capacity
-            */
-            while (numElements > (capacity() / 2) - 1)
-            {
-                resize();
-            }
+            // // This is only for the priority queue at the beginning
+            // if (numElements >= capacity())
+            // {
+            beginCheck();
+            // }
+            //
+            // /*
+            // while loop beats std::vector to the punch with resizing first since
+            // std::vectors size doubles automagically if elements equals half capacity
+            // */
+            // while (numElements > (capacity() / 2) - 1)
+            // {
+            //     resize();
+            // }
 
             node newNode(value, priority);
             Q[(numElements)-1] = newNode;
@@ -110,10 +110,31 @@ namespace usu
         // void resize(unsigned int reduced);
         void beginCheck()
         {
-            while (numElements >= capacity())
+            // This is only for the priority queue at the beginning
+            if (numElements >= capacity())
             {
-                resize();
+                while (numElements >= capacity())
+                {
+                    resize();
+                }
+                return;
             }
+            /*
+            while loop beats std::vector to the punch with resizing first since
+            std::vectors size doubles automagically if elements equals half capacity
+            */
+            if (numElements > (capacity() / 2) - 1)
+            {
+                while (numElements > (capacity() / 2) - 1)
+                {
+                    resize();
+                }
+            }
+
+            // while (numElements >= capacity())
+            // {
+            //     resize();
+            // }
         }
 
         // This enlargens size of 'Q' ==>new_size = (current size) * 1.25 + 1
