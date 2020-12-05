@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cmath>
 #include <exception>
 #include <initializer_list>
 #include <iomanip>
@@ -51,7 +53,7 @@ namespace usu
                 }
             }
             value_type getValue() { return value; }
-            priority_type getPriority() { return priority; }
+            priority_type getPriority() const { return priority; }
         };
 
         std::vector<node> Q;
@@ -79,25 +81,15 @@ namespace usu
         void enqueue(value_type value, priority_type priority)
         {
             numElements++;
-
-            // // This is only for the priority queue at the beginning
-            // if (numElements >= capacity())
-            // {
             beginCheck();
-            // }
-            //
-            // /*
-            // while loop beats std::vector to the punch with resizing first since
-            // std::vectors size doubles automagically if elements equals half capacity
-            // */
-            // while (numElements > (capacity() / 2) - 1)
-            // {
-            //     resize();
-            // }
 
+            // Place new node at the end
             node newNode(value, priority);
             Q[(numElements)-1] = newNode;
             lastIndex = numElements - 1;
+
+            // Max heap operations
+            maxHeapIt();
         }
         // auto dequeue();
         // iterator find(value_type value);
@@ -134,6 +126,53 @@ namespace usu
             // while (numElements >= capacity())
             // {
             //     resize();
+            // }
+        }
+
+        void maxHeapIt()
+        {
+            auto currIndex = lastIndex;
+
+            if (currIndex == 0)
+            {
+                return;
+            }
+
+            // currIndex even check
+            unsigned int odd = 0;
+            if (currIndex % 2 == 1)
+            {
+                odd = 1;
+            }
+
+            auto newIndex = std::ceil((currIndex / 2)) - odd;
+            while (Q[currIndex].compareTo(Q[newIndex]) > 0)
+            {
+                // std::iter_swap(begin() + currIndex, begin() + newIndex);
+                auto temp1 = Q[newIndex];
+                // T temp2 = Q[currIndex];
+                Q[newIndex] = Q[currIndex];
+                Q[currIndex] = temp1;
+
+                // Q[currIndex].swapnewIndex;
+                currIndex = newIndex;
+                newIndex = std::ceil((currIndex / 2)) - odd;
+                if (newIndex < 0)
+                {
+                    return;
+                }
+            }
+
+            // while (auto newIndex = (currIndex / 2 - odd); Q[currIndex].compareTo(Q[(currIndex / 2 - odd)]) > 0)
+            // {
+            //     // std::iter_swap(begin() + currIndex, begin() + ((currIndex / 2) - odd));
+            //     T temp1 = Q[((currIndex / 2) - odd)];
+            //     // T temp2 = Q[currIndex];
+            //     Q[((currIndex / 2) - odd)] = Q[currIndex];
+            //     Q[currIndex] = temp1;
+            //
+            //     // Q[currIndex].swap((currIndex / 2) - odd);
+            //     currIndex = (currIndex / 2) - odd;
             // }
         }
 
