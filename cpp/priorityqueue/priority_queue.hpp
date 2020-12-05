@@ -5,14 +5,12 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <vector>
 
 namespace usu
 {
-    template <typename T>
-    using TPriori = std::pair<T, unsigned int>;
-
     template <typename T, typename R = unsigned int>
     class priority_queue
     {
@@ -24,11 +22,10 @@ namespace usu
 
         class node
         {
-          private:
+          public:
             value_type value;
             priority_type priority;
 
-          public:
             node() = default;
             node(value_type theValue, priority_type thePriority) :
                 node()
@@ -52,8 +49,132 @@ namespace usu
                     return 0;
                 }
             }
+
             value_type getValue() { return value; }
             priority_type getPriority() const { return priority; }
+        };
+
+        class iterator : public std::iterator<std::forward_iterator_tag, priority_queue*>
+        {
+          public:
+            using iterator_category = std::forward_iterator_tag;
+
+            iterator() :
+                iterator(nullptr)
+            {
+            }
+
+            iterator(std::shared_ptr<std::vector<node>> pointer, size_type pos = 0) :
+                index(pos)
+            // data(pointer), index(pos)
+            {
+                dataList = pointer;
+                data = std::make_shared<node>((*dataList)[index]);
+            }
+
+            iterator(const iterator& copy)
+            {
+                this->index = copy.index;
+                this->dataList = copy.dataList;
+                this->data = copy.data;
+            }
+
+            iterator(iterator&& move) noexcept
+            {
+                this->index = move.index;
+                this->dataList = move.dataList;
+                this->data = move.data;
+
+                move.dataList = nullptr;
+            }
+
+            iterator& operator=(const iterator& copy)
+            {
+                this->index = copy.index;
+                this->dataList = copy.dataList;
+                this->data = copy.data;
+
+                return *this;
+            }
+
+            iterator& operator=(iterator&& move)
+            {
+                if (this != &move)
+                {
+                    std::swap(this->index, move.index);
+                    std::swap(this->dataList, move.dataList);
+                    std::swap(this->data, move.data);
+                }
+
+                return *this;
+            }
+
+            iterator operator+(int sum)
+            {
+
+                // if (index + sum > capacity())
+                // {
+                //
+                // }
+
+                index += sum;
+                std::shared_ptr newData = std::make_shared<node>((*dataList)[index]);
+                std::swap(data, newData);
+
+                return *this;
+            }
+
+            iterator operator+=(int sum)
+            {
+                index += sum;
+                data = std::make_shared<node>((*dataList)[index]);
+
+                return *this;
+            }
+
+            // Pre-increment
+            iterator operator++()
+            {
+                index++;
+                data = std::make_shared<node>((*dataList)[index]);
+                return *this;
+            }
+
+            // Post-increment
+            iterator operator++(int)
+            {
+                iterator iter = *this;
+                index++;
+                data = std::make_shared<node>((*dataList)[index]);
+                return iter;
+            }
+
+            node operator*()
+            {
+                return *data;
+            }
+
+            std::shared_ptr<node> operator->()
+            {
+                return data;
+            }
+
+            bool operator!=(iterator copy)
+            {
+                return index != copy.index;
+            }
+
+            bool operator==(iterator copy)
+            {
+                return index == copy.index;
+            }
+
+            size_type getIndex() { return index; }
+
+          private:
+            size_type index;
+            std::shared_ptr<std::vector<node>> dataList;
+            std::shared_ptr<node> data;
         };
 
         std::vector<node> Q;
@@ -91,13 +212,67 @@ namespace usu
             // Max heap operations
             maxHeapIt();
         }
-        // auto dequeue();
+
+        auto dequeue()
+        {
+            if (empty())
+            {
+                throw std::exception();
+            }
+
+            node max = Q[0];
+            node temp;
+
+            if (size() == 1)
+            {
+                Q.erase(0);
+                numElements--;
+
+                return max;
+            }
+            else if (size() == 2)
+            {
+                temp = Q[1];
+                Q.erase(0);
+                numElements--;
+
+                return max;
+            }
+
+            unsigned int index = 0;
+            if (Q[1].compareTo(Q[2]) > 0)
+            {
+                index = 1;
+                temp = Q[1];
+            }
+            else
+            {
+                index = 2;
+                temp = Q[2];
+            }
+        }
         // iterator find(value_type value);
         // void update(iterator i, priority_type priority);
 
-        // bool empty();
-        // iterator begin();
-        // iterator end();
+        iterator begin()
+        {
+            if (empty())
+            {
+                return end();
+            }
+
+            std::shared_ptr<std::vector<node>> theFirst = std::make_shared<std::vector<node>>(Q);
+            iterator first(theFirst);
+            return first;
+        }
+
+        iterator end()
+        {
+            std::shared_ptr<std::vector<node>> theEnd = std::make_shared<std::vector<node>>(Q);
+            iterator end(theEnd, size());
+
+            return end;
+        }
 
         // void resize(unsigned int reduced);
         void beginCheck()
@@ -111,6 +286,7 @@ namespace usu
                 }
                 return;
             }
+
             /*
             while loop beats std::vector to the punch with resizing first since
             std::vectors size doubles automagically if elements equals half capacity
@@ -122,11 +298,6 @@ namespace usu
                     resize();
                 }
             }
-
-            // while (numElements >= capacity())
-            // {
-            //     resize();
-            // }
         }
 
         void maxHeapIt()
@@ -139,13 +310,17 @@ namespace usu
             }
 
             // currIndex even check
-            unsigned int odd = 0;
+            unsigned int odd = 1;
             if (currIndex % 2 == 1)
             {
-                odd = 1;
+                odd = 2;
             }
 
-            auto newIndex = std::ceil((currIndex / 2)) - odd;
+            auto newIndex = (currIndex - odd) / 2;
+            if (newIndex < 0)
+            {
+                newIndex = 0;
+            }
             while (Q[currIndex].compareTo(Q[newIndex]) > 0)
             {
                 // std::iter_swap(begin() + currIndex, begin() + newIndex);
@@ -156,24 +331,30 @@ namespace usu
 
                 // Q[currIndex].swapnewIndex;
                 currIndex = newIndex;
-                newIndex = std::ceil((currIndex / 2)) - odd;
+                newIndex = (currIndex - odd) / 2;
                 if (newIndex < 0)
                 {
                     return;
                 }
             }
+        }
 
-            // while (auto newIndex = (currIndex / 2 - odd); Q[currIndex].compareTo(Q[(currIndex / 2 - odd)]) > 0)
-            // {
-            //     // std::iter_swap(begin() + currIndex, begin() + ((currIndex / 2) - odd));
-            //     T temp1 = Q[((currIndex / 2) - odd)];
-            //     // T temp2 = Q[currIndex];
-            //     Q[((currIndex / 2) - odd)] = Q[currIndex];
-            //     Q[currIndex] = temp1;
-            //
-            //     // Q[currIndex].swap((currIndex / 2) - odd);
-            //     currIndex = (currIndex / 2) - odd;
-            // }
+        node getFirst()
+        {
+            if (!empty())
+            {
+                return Q[0];
+            }
+            else
+            {
+                throw std::exception();
+            }
+        }
+
+        // Returns true if 'Q' is empty
+        bool empty()
+        {
+            return size() == 0;
         }
 
         // This enlargens size of 'Q' ==>new_size = (current size) * 1.25 + 1
@@ -192,33 +373,6 @@ namespace usu
         unsigned int size() { return numElements; }
         // Returns 'Q'
         std::vector<node> getQ() { return Q; }
-
-        // class iterator
-        // {
-        //   public:
-        //     using iterator_category = std::forward_iterator_tag;
-        //     iterator() :
-        //         iterator(nullptr) {}
-        //
-        //     iterator(value_type* pointer) :
-        //         m_data(ptr), m_pos(0) {}
-        //
-        //     iterator(unsigned int pos, value_type* pointer) :
-        //         m_pos(pos), m_data(ptr) {}
-        //
-        //     // NEEDS
-        //     // Copy constructor
-        //     // Move constructor
-        //     // Copy assignment op
-        //     // Move assignment op
-        //     // Incrementable
-        //     // Dereferencable
-        //
-        //   private:
-        //     unsigned int m_pos;
-        //     // pointer to the data
-        //     value_type* m_data;
-        // };
 
       private:
         unsigned int numElements;
