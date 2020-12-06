@@ -79,11 +79,14 @@ namespace usu
             {
             }
             // Overloaded constructor
-            iterator(std::shared_ptr<std::vector<node>> dataPointer, std::shared_ptr<size_type> numOfElements, size_type pos = 0) :
-                index(pos),
-                Que(dataPointer),
-                num(numOfElements)
+            iterator(std::shared_ptr<std::vector<node>> dataPointer, std::shared_ptr<size_type> numOfElements, size_type pos = 0)
+            // index(pos),
+            // Que(dataPointer),
+            // num(numOfElements)
             {
+                index = pos;
+                Que = dataPointer;
+                num = numOfElements;
             }
             // Destructor
             ~iterator()
@@ -92,18 +95,24 @@ namespace usu
                 num.reset();
             }
             // Copy constructor
-            iterator(const iterator& copy) :
-                index(copy.index),
-                Que(copy.Que),
-                num(copy.num)
+            iterator(const iterator& copy)
+            // index(copy.index),
+            // Que(copy.Que),
+            // num(copy.num)
             {
+                index = copy.index;
+                Que = copy.Que;
+                num = copy.num;
             }
             // Move constructor
-            iterator(iterator&& move) noexcept :
-                index(move.index),
-                Que(move.Que),
-                num(move.num)
+            iterator(iterator&& move) noexcept
+            // index(move.index),
+            // Que(move.Que),
+            // num(move.num)
             {
+                index = move.index;
+                Que = move.Que;
+                num = move.num;
             }
             // Copy assignmnet operator overload
             iterator& operator=(const iterator& copy)
@@ -133,20 +142,31 @@ namespace usu
             iterator operator+(int sum)
             {
                 index += sum;
-                return withinBounds() ? *this : this->getQue().end();
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                return *this;
             }
 
             iterator operator+=(int sum)
             {
                 index += sum;
-                return withinBounds() ? *this : this->getQue().end();
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                return *this;
             }
 
             // Pre-increment
             iterator operator++()
             {
                 index++;
-                return withinBounds() ? *this : this->getQue().end();
+
+                return *this;
             }
 
             // Post-increment
@@ -154,26 +174,28 @@ namespace usu
             {
                 iterator iter = *this;
                 index++;
-                return withinBounds() ? iter : iter->getQue().end();
+
+                return iter;
             }
 
-            std::vector<node>& operator*() const
+            node& operator*()
             {
-                return *Que;
+                return (*Que)[index];
             }
 
-            std::shared_ptr<std::vector<node>> operator->() const
+            std::shared_ptr<node> operator->()
             {
-                return Que;
+                std::shared_ptr<node> currNode = std::make_shared<node>((*Que)[index]);
+                return currNode;
             }
 
             const node operator[](size_type index) const
             {
-                if (index >= *numElements)
+                if (index >= *num)
                 {
                     throw std::exception();
                 }
-                return (*Q)[index];
+                return (*Que)[index];
             }
 
             bool operator!=(iterator copy)
@@ -188,7 +210,7 @@ namespace usu
 
             bool withinBounds()
             {
-                if (index > *num)
+                if (index >= *num)
                 {
                     return false;
                 }
@@ -196,11 +218,13 @@ namespace usu
                 {
                     throw std::exception();
                 }
+
                 return true;
             }
 
             std::vector<node> getQue() { return *Que; }
             size_type getIndex() const { return index; }
+            void setIndex(unsigned int newIndex) { index = newIndex; }
 
           private:
             size_type index;
@@ -211,12 +235,12 @@ namespace usu
         // Default constructor
         priority_queue()
         {
-            size_type NE = new size_type(0);
-            size_type LI = new size_type(0);
-            std::vector<node> QU = new std::vector<node>();
-            numElements = std::make_shared<size_type>(NE);
-            lastIndex = std::make_shared<size_type>(LI);
-            Q = std::make_shared<std::vector<node>>(QU);
+            // size_type NE = new size_type(0);
+            // size_type LI = new size_type(0);
+            // std::vector<node> QU = new std::vector<node>();
+            numElements = std::make_shared<size_type>(*(new size_type(0)));
+            lastIndex = std::make_shared<size_type>(*(new size_type(0)));
+            Q = std::make_shared<std::vector<node>>(*(new std::vector<node>()));
         }
 
         // Overloaded constructor for initializer_list
@@ -252,29 +276,19 @@ namespace usu
             // Swap with last element than delete
             std::iter_swap(begin(), begin() + *lastIndex);
 
-            // CHANGE THE Q.BEGIN()!!!
             (*Q).erase((*Q).begin() + *lastIndex);
 
             (*numElements)--;
             *lastIndex = *numElements - 1;
 
             // Trickle down the first element
-            int currNode = 0;
+            iterator i = begin();
 
             // Check children for bigger priorities
-            while (((2 * currNode) + 2 < static_cast<int>(*numElements)) && ((*Q)[currNode].compareTo((*Q)[(2 * currNode) + 1]) < 0 || (*Q)[currNode].compareTo((*Q)[(2 * currNode) + 2]) < 0))
+            // Check for child swap
+            if (child(i.getIndex()) > 0)
             {
-                // Checks the bigger of the two childs priorioties
-                if ((*Q)[(2 * currNode) + 1].compareTo((*Q)[(2 * currNode) + 2]) >= 0)
-                {
-                    std::iter_swap(begin() + currNode, begin() + ((2 * currNode) + 1));
-                    currNode = (2 * currNode) + 1;
-                }
-                else
-                {
-                    std::iter_swap(begin() + currNode, begin() + ((2 * currNode) + 2));
-                    currNode = (2 * currNode) + 2;
-                }
+                maxHeapDelete(i);
             }
 
             return maxNode;
@@ -295,44 +309,21 @@ namespace usu
         void update(iterator i, priority_type priority)
         {
             i->setPriority(priority);
+            int currNode = i.getIndex();
 
             // Check for parent swap
-            if (i->compareTo((*Q)[parent(i.getIndex())]) > 0)
+            if (i->compareTo((*Q)[parent(currNode)]) > 0)
             {
-                while (i->compareTo((*Q)[parent(i.getIndex())]) > 0)
+                while (i->compareTo((*Q)[parent(currNode)]) > 0)
                 {
-                    std::iter_swap(begin() + i.getIndex(), begin() + parent(i.getIndex()));
+                    std::iter_swap(begin() + currNode, begin() + parent(currNode));
+                    currNode = parent(currNode);
                 }
             }
             // Check for child swap
-            else if (child(i.getIndex()) > 0)
+            else if (child(currNode) > 0)
             {
-                int kid1 = 0;
-                int kid2 = 0;
-
-                while (child(i.getIndex()) > 0)
-                {
-                    kid1 = child(i.getIndex(), 1);
-                    kid2 = child(i.getIndex(), 2);
-
-                    // Check for two children
-                    if (child(i.getIndex()) > 1)
-                    {
-                        if (min((*Q)[kid1].getPriority(), (*Q)[kid2].getPriority()) == 1)
-                        {
-                            std::iter_swap(begin() + i.getIndex(), begin() + kid1);
-                        }
-                        else
-                        {
-                            std::iter_swap(begin() + i.getIndex(), begin() + kid2);
-                        }
-                    }
-                    // One child, can only be left child
-                    else if (i->compareTo((*Q)[child(i.getIndex(), 1)]) < 0)
-                    {
-                        std::iter_swap(begin() + i.getIndex(), begin() + kid1);
-                    }
-                }
+                maxHeapDelete(i);
             }
         }
 
@@ -396,6 +387,40 @@ namespace usu
             }
         }
 
+        void maxHeapDelete(iterator i)
+        {
+            int kid1 = 0;
+            int kid2 = 0;
+            int currNode = i.getIndex();
+
+            while (child(currNode) > 0)
+            {
+                kid1 = child(currNode, 1);
+                kid2 = child(currNode, 2);
+
+                // Check for two children
+                if (child(currNode) > 1)
+                {
+                    if (min((*Q)[kid1].getPriority(), (*Q)[kid2].getPriority()) == 1)
+                    {
+                        std::iter_swap(begin() + currNode, begin() + kid1);
+                        currNode = kid1;
+                    }
+                    else
+                    {
+                        std::iter_swap(begin() + currNode, begin() + kid2);
+                        currNode = kid2;
+                    }
+                }
+                // One child, can only be left child
+                else if (i->compareTo((*Q)[child(currNode, 1)]) < 0)
+                {
+                    std::iter_swap(begin() + currNode, begin() + kid1);
+                    currNode = kid1;
+                }
+            }
+        }
+
         int parent(int node)
         {
             if (node == 0)
@@ -432,11 +457,15 @@ namespace usu
             return amount;
         }
 
-        int child(int node, int whichKid)
+        int child(size_type node, size_type whichKid)
         {
             if (node < 0)
             {
                 throw std::exception();
+            }
+            else if (node >= *numElements)
+            {
+                return -1;
             }
 
             switch (whichKid)
