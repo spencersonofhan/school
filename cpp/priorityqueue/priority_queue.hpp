@@ -201,16 +201,12 @@ namespace usu
 
         void enqueue(value_type value, priority_type priority)
         {
-            numElements++;
+            // Checks if size of Q is adequate
             beginCheck();
 
-            // Place new node at the end
-            node newNode(value, priority);
-            Q[(numElements)-1] = newNode;
-            lastIndex = numElements - 1;
-
             // Max heap operations
-            maxHeapIt();
+            node newNode(value, priority);
+            maxHeapAdd(newNode);
         }
 
         auto dequeue()
@@ -251,7 +247,9 @@ namespace usu
                 temp = Q[2];
             }
         }
+
         // iterator find(value_type value);
+
         // void update(iterator i, priority_type priority);
 
         iterator begin()
@@ -300,43 +298,40 @@ namespace usu
             }
         }
 
-        void maxHeapIt()
+        void maxHeapAdd(node& newNode)
         {
-            auto currIndex = lastIndex;
+            numElements++;
+            lastIndex = numElements - 1;
+            int currNode = static_cast<int>(lastIndex);
 
-            if (currIndex == 0)
-            {
-                return;
-            }
+            Q[currNode] = newNode;
 
-            // currIndex even check
-            unsigned int odd = 1;
-            if (currIndex % 2 == 1)
+            // Check parent for smaller values
+            while (Q[currNode].compareTo(Q[parent(currNode)]) > 0)
             {
-                odd = 2;
+                std::iter_swap(Q.begin() + currNode, Q.begin() + parent(currNode));
+                currNode = parent(currNode);
             }
+        }
 
-            auto newIndex = (currIndex - odd) / 2;
-            if (newIndex < 0)
+        int parent(int node)
+        {
+            if (node == 0)
             {
-                newIndex = 0;
+                return 0;
             }
-            while (Q[currIndex].compareTo(Q[newIndex]) > 0)
-            {
-                // std::iter_swap(begin() + currIndex, begin() + newIndex);
-                auto temp1 = Q[newIndex];
-                // T temp2 = Q[currIndex];
-                Q[newIndex] = Q[currIndex];
-                Q[currIndex] = temp1;
+            return (node - 1) / 2;
+        }
 
-                // Q[currIndex].swapnewIndex;
-                currIndex = newIndex;
-                newIndex = (currIndex - odd) / 2;
-                if (newIndex < 0)
-                {
-                    return;
-                }
+        std::pair<int, int> childs(int node)
+        {
+            if (node < 0)
+            {
+                throw std::exception();
             }
+            std::pair<int, int> childs((2 * node) + 1, (2 * node) + 2);
+
+            return childs;
         }
 
         node getFirst()
