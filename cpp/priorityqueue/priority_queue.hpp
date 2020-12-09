@@ -13,59 +13,56 @@
 namespace usu
 {
     template <typename T, typename R = unsigned int>
+    class node
+    {
+      public:
+        T value;
+        R priority;
+
+        node() = default;
+        node(value_type theValue, priority_type thePriority) :
+            node()
+        {
+            value = theValue;
+            priority = thePriority;
+        }
+
+        int compareTo(const node<T, R>& comperator)
+        {
+            if (priority < comperator.getPriority())
+            {
+                return -1;
+            }
+            else if (priority > comperator.getPriority())
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    };
+
+    template <typename T, typename R = unsigned int>
     class priority_queue
     {
       public:
         using value_type = T;
         using priority_type = R;
         using size_type = unsigned int;
+        using pointer = T*;
+        using reference = T&;
+
+
         using TPriori = std::pair<T, R>;
 
-        class node
-        {
-          public:
-            value_type value;
-            priority_type priority;
 
-            node() = default;
-            node(value_type theValue, priority_type thePriority) :
-                node()
-            {
-                value = theValue;
-                priority = thePriority;
-            }
-
-            int compareTo(const node& comperator)
-            {
-                if (priority < comperator.getPriority())
-                {
-                    return -1;
-                }
-                else if (priority > comperator.getPriority())
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-
-            priority_type getPriority() const { return priority; }
-            value_type getValue() const { return value; }
-            void setPriority(priority_type newPriority) { priority = newPriority; }
-            void setValue(value_type newValue) { value = newValue; }
-        };
 
         class iterator : public std::iterator<std::forward_iterator_tag, priority_queue*>
         {
           public:
-            typedef std::random_access_iterator_tag iterator_category;
-            typedef T value_type;
-            typedef std::ptrdiff_t difference_type;
-            typedef T& reference;
-            typedef T* pointer;
-
+            using iterator_category = std::forward_iterator_tag;
             // friend bool operator==(const iterator&, const iterator&);
             // friend bool operator!=(const iterator&, const iterator&);
             // friend bool operator<(const iterator&, const iterator&);
@@ -80,13 +77,12 @@ namespace usu
             }
             // Overloaded constructor
             iterator(std::shared_ptr<std::vector<node>> dataPointer, std::shared_ptr<size_type> numOfElements, size_type pos = 0)
-            // index(pos),
-            // Que(dataPointer),
-            // num(numOfElements)
             {
                 index = pos;
                 Que = dataPointer;
                 num = numOfElements;
+                value = (*Que)[index].value;
+                priority = (*Que)[index].priority;
             }
             // Destructor
             ~iterator()
@@ -96,23 +92,23 @@ namespace usu
             }
             // Copy constructor
             iterator(const iterator& copy)
-            // index(copy.index),
-            // Que(copy.Que),
-            // num(copy.num)
             {
                 index = copy.index;
                 Que = copy.Que;
                 num = copy.num;
+
+                value = (*Que)[index].value;
+                priority = (*Que)[index].priority;
             }
             // Move constructor
             iterator(iterator&& move) noexcept
-            // index(move.index),
-            // Que(move.Que),
-            // num(move.num)
             {
                 index = move.index;
                 Que = move.Que;
                 num = move.num;
+
+                value = (*Que)[index].value;
+                priority = (*Que)[index].priority;
             }
             // Copy assignmnet operator overload
             iterator& operator=(const iterator& copy)
@@ -122,6 +118,9 @@ namespace usu
                     index = copy.index;
                     Que = copy.Que;
                     num = copy.num;
+
+                    value = (*Que)[index].value;
+                    priority = (*Que)[index].priority;
                 }
 
                 return *this;
@@ -134,6 +133,8 @@ namespace usu
                     index = move.index;
                     Que.swap(move.Que);
                     num.swap(move.num);
+
+                    updateVandP();
                 }
 
                 return *this;
@@ -147,12 +148,87 @@ namespace usu
                     this->setIndex(*(this->num) - 1);
                 }
 
+                updateVandP();
+
+                return *this;
+            }
+
+            iterator operator+(iterator sum)
+            {
+                index += sum.getIndex();
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                updateVandP();
+
                 return *this;
             }
 
             iterator operator+=(int sum)
             {
                 index += sum;
+                if (!withinBounds())
+                {
+
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                updateVandP();
+
+                return *this;
+            }
+
+            iterator operator+=(iterator sum)
+            {
+                index += sum.getIndex();
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                updateVandP();
+
+                return *this;
+            }
+
+            iterator operator-(int min)
+            {
+                index -= min;
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                return *this;
+            }
+
+            iterator operator-(iterator min)
+            {
+                index -= min.getIndex();
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                return *this;
+            }
+
+            iterator operator-=(int min)
+            {
+                index -= min;
+                if (!withinBounds())
+                {
+                    this->setIndex(*(this->num) - 1);
+                }
+
+                return *this;
+            }
+
+            iterator operator-=(iterator min)
+            {
+                index -= min.getIndex();
                 if (!withinBounds())
                 {
                     this->setIndex(*(this->num) - 1);
@@ -222,11 +298,18 @@ namespace usu
                 return true;
             }
 
-            std::vector<node> getQue() { return *Que; }
-            size_type getIndex() const { return index; }
+            void updateVandP()
+            {
+                value = (*Que)[index].value;
+                priority = (*Que)[index].priority;
+            }
+
+
             void setIndex(unsigned int newIndex) { index = newIndex; }
 
           private:
+            value_type value;
+            priority_type priority;
             size_type index;
             std::shared_ptr<size_type> num;
             std::shared_ptr<std::vector<node>> Que;
@@ -298,7 +381,7 @@ namespace usu
         {
             for (auto i = begin(); i != end(); ++i)
             {
-                if (i->getValue() == value)
+                if (i->value == value)
                 {
                     return i;
                 }
@@ -308,7 +391,7 @@ namespace usu
 
         void update(iterator i, priority_type priority)
         {
-            i->setPriority(priority);
+            i->priority;
             int currNode = i.getIndex();
 
             // Check for parent swap
@@ -401,7 +484,7 @@ namespace usu
                 // Check for two children
                 if (child(currNode) > 1)
                 {
-                    if (min((*Q)[kid1].getPriority(), (*Q)[kid2].getPriority()) == 1)
+                    if (min((*Q)[kid1].priority, (*Q)[kid2].priority) == 1)
                     {
                         std::iter_swap(begin() + currNode, begin() + kid1);
                         currNode = kid1;
@@ -509,4 +592,201 @@ namespace usu
         std::shared_ptr<size_type> lastIndex;
         std::shared_ptr<std::vector<node>> Q;
     };
+
+
+
+    // Default constructor
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator() :
+        iterator(nullptr)
+    {
+    }
+    // Overloaded constructor
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator(std::shared_ptr<std::vector<node>> dataPointer, std::shared_ptr<size_type> numOfElements, size_type pos = 0)
+    {
+        index = pos;
+        Que = dataPointer;
+        num = numOfElements;
+        value = (*Que)[index].value;
+        priority = (*Que)[index].priority;
+    }
+    // Destructor
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::~iterator()
+    {
+        Que.reset();
+        num.reset();
+    }
+    // Copy constructor
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator(const iterator& copy)
+    {
+        index = copy.index;
+        Que = copy.Que;
+        num = copy.num;
+
+        value = (*Que)[index].value;
+        priority = (*Que)[index].priority;
+    }
+    // Move constructor
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator(iterator&& move) noexcept
+    {
+        index = move.index;
+        Que = move.Que;
+        num = move.num;
+
+        value = (*Que)[index].value;
+        priority = (*Que)[index].priority;
+    }
+    // Copy assignmnet operator overload
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator& operator=(const iterator& copy)
+    {
+        if (this != &copy)
+        {
+            index = copy.index;
+            Que = copy.Que;
+            num = copy.num;
+
+            value = (*Que)[index].value;
+            priority = (*Que)[index].priority;
+        }
+
+        return *this;
+    }
+    // Move assignment operator overload
+    template <typename T, typename R = unsigned int>
+    priority_queue<T, R>::iterator& operator=(iterator&& move)
+    {
+        if (this != &move)
+        {
+            index = move.index;
+            Que.swap(move.Que);
+            num.swap(move.num);
+
+            updateVandP();
+        }
+
+        return *this;
+    }
+
+    iterator operator+(int sum)
+    {
+        index += sum;
+        if (!withinBounds())
+        {
+            this->setIndex(*(this->num) - 1);
+        }
+
+        updateVandP();
+
+        return *this;
+    }
+
+    iterator operator+(iterator sum)
+    {
+        index += sum.getIndex();
+        if (!withinBounds())
+        {
+            this->setIndex(*(this->num) - 1);
+        }
+
+        updateVandP();
+
+        return *this;
+    }
+
+
+    iterator operator-(int min)
+    {
+        index -= min;
+        if (!withinBounds())
+        {
+            this->setIndex(*(this->num) - 1);
+        }
+
+        return *this;
+    }
+
+    iterator operator-(iterator min)
+    {
+        index -= min.getIndex();
+        if (!withinBounds())
+        {
+            this->setIndex(*(this->num) - 1);
+        }
+
+        return *this;
+    }
+
+    // Pre-increment
+    template <typename T, R = unsigned int>
+    typename priority_queue<T, R>::iterator operator++()
+    {
+        index++;
+
+        return *this;
+    }
+
+    // Post-increment
+    template <typename T, R = unsigned int>
+    typename priority_queue<T, R>::iterator operator++(int)
+    {
+        iterator iter = *this;
+        index++;
+
+        return iter;
+    }
+
+    node& operator*()
+    {
+        return (*Que)[index];
+    }
+
+    std::shared_ptr<node> operator->()
+    {
+        std::shared_ptr<node> currNode = std::make_shared<node>((*Que)[index]);
+        return currNode;
+    }
+
+    const node operator[](size_type index) const
+    {
+        if (index >= *num)
+        {
+            throw std::exception();
+        }
+        return (*Que)[index];
+    }
+
+    bool operator!=(iterator copy)
+    {
+        return index != copy.index;
+    }
+
+    bool operator==(iterator copy)
+    {
+        return index == copy.index;
+    }
+
+    bool withinBounds()
+    {
+        if (index >= *num)
+        {
+            return false;
+        }
+        else if (index < 0)
+        {
+            throw std::exception();
+        }
+
+        return true;
+    }
+
+    void updateVandP()
+    {
+        value = (*Que)[index].value;
+        priority = (*Que)[index].priority;
+    }
 } // namespace usu
