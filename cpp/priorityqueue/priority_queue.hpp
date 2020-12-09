@@ -49,9 +49,6 @@ namespace usu
           public:
             using iterator_category = std::forward_iterator_tag;
 
-            T value;
-            R priority;
-
             PIterator();
             // Overloaded constructors
             PIterator(std::vector<node<T, R>> theData, size_type position);
@@ -75,12 +72,6 @@ namespace usu
 
             node<T, R>& operator*();
             node<T, R>* operator->();
-
-            void updateVP()
-            {
-                value = data[pos]->value;
-                priority = data[pos]->priority;
-            }
 
             bool operator!=(const PIterator& rhs) const { return this->pos != rhs.pos; }
             bool operator==(const PIterator& rhs) const { return this->pos == rhs.pos; }
@@ -135,20 +126,19 @@ namespace usu
                 throw std::exception();
             }
 
-            // Extract first element
-            node<T, R> maxNode = Q[0];
+            // Extract first element copy
+            auto maxNode = Q[0];
 
             // Swap with last element than delete
-            std::iter_swap(begin(), begin() + (numElements - 1));
+            Q[0] = Q[numElements - 1];
 
-            // CHANGE TO JUST BEGIN()
-            Q[numElements - 1] = NULL;
+            Q.erase(Q.begin() + (numElements - 1));
             numElements--;
 
             // Check children for bigger priorities
             if (children(0) > 0)
             {
-                maxHeapDelete();
+                trickleDown(0);
             }
 
             return maxNode;
@@ -168,25 +158,21 @@ namespace usu
 
         void update(PIterator i, priority_type priority)
         {
-            (*i).priority = priority;
-            // int currNode = i.getIndex();
+            int curr = index(i);
+            Q[curr].priority = priority;
 
-            // Check for parent swap
-            if (Q[index(parent(i))] < *i)
+            // Check parent
+            if (Q[curr] > Q[parent(curr)])
             {
-                while (Q[index(parent(i))] < *i)
-                {
-                    std::iter_swap(i, begin() + index(parent(i)));
-                }
+                trickleUp(curr);
             }
-            // Check for child swap
-            else if (children(i) > 0)
+            // Check children
+            else if (children(curr) > 0)
             {
-                maxHeapDelete(i);
+                trickleDown(curr);
             }
         }
 
-        // void resize(unsigned int reduced);
         void beginCheck()
         {
             // This is only for the priority queue at the beginning
@@ -215,66 +201,81 @@ namespace usu
         void maxHeapAdd(node<T, R>& newNode)
         {
             numElements++;
-
             Q[numElements - 1] = newNode;
-            PIterator i = begin() + (numElements - 1);
 
             // Check parent for smaller values
-            while (Q[index(i)] > Q[index(parent(i))])
+            int curr = numElements - 1;
+            trickleUp(curr);
+        }
+
+        void trickleUp(int curr)
+        {
+            while (Q[curr] > Q[parent(curr)])
             {
-                // DOESN'T SWAP????
-                std::iter_swap(i, begin() + index(parent(i)));
+                int currParent = parent(curr);
+                auto temp = Q[currParent];
+                Q[currParent] = Q[curr];
+                Q[curr] = temp;
+                curr = currParent;
             }
         }
 
-        void maxHeapDelete()
+        void trickleDown(int curr)
         {
-            int curr = 0;
-            int kid1 = 0;
-            int kid2 = 0;
+            size_type lNode = child(curr, 1);
+            size_type rNode = child(curr, 2);
 
-
-            // Trickle down the first element
             while (children(curr) > 0)
             {
-                kid1 = child(curr, 1);
-                kid2 = child(curr, 2);
+                if (rNode < numElements && children(curr) > 1)
+                {
+                    if (Q[curr] < Q[lNode] || Q[curr] < Q[rNode])
+                    {
+                        if (Q[lNode] > Q[rNode])
+                        {
+                            // Trickle lchild
+                            curr = trickle(curr, lNode);
+                        }
+                        else
+                        {
+                            // Trickle rchild
+                            curr = trickle(curr, rNode);
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else if ((lNode < numElements) && Q[curr] < Q[lNode])
+                {
+                    // trickle lchild
+                    curr = trickle(curr, lNode);
+                }
+                else
+                {
+                    return;
+                }
 
-                // Check for two children
-                if (children(curr) > 1)
-                {
-                    if (Q[kid1] > Q[kid2])
-                    {
-                        auto temp = Q[kid1];
-                        Q[kid1] = Q[curr];
-                        Q[curr] = temp;
-                        curr = kid1;
-                    }
-                    else if  (Q[kid1] < Q[kid2])
-                    {
-                        auto temp = Q[kid2];
-                        Q[kid2] = Q[curr];
-                        Q[curr] = temp;
-                        curr = kid2;
-                    }
-                }
-                // One child, can only be left child
-                else if (Q[curr] < Q[child(curr, 1)])
-                {
-                    auto temp = Q[kid1];
-                    Q[kid1] = Q[curr];
-                    Q[curr] = temp;
-                    curr = kid1;
-                }
+                lNode = child(curr, 1);
+                rNode = child(curr, 2);
             }
         }
 
-        int parent(int node)
+        size_type trickle(size_type curr, size_type swap)
+        {
+            auto temp = Q[swap];
+            Q[swap] = Q[curr];
+            Q[curr] = temp;
+            return swap;
+        }
+
+        int parent(unsigned int node)
         {
             return node <= 0 ? 0 : (node - 1) / 2;
         }
 
-        int children(int node)
+        int children(unsigned int node)
         {
             int amount = 0;
 
