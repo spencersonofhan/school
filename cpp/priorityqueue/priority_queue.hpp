@@ -44,37 +44,37 @@ namespace usu
         using reference = node<T, R>&;
         using size_type = unsigned int;
 
-        class PIterator : public std::iterator<std::forward_iterator_tag, priority_queue*>
+        class iterator : public std::iterator<std::forward_iterator_tag, priority_queue*>
         {
           public:
             using iterator_category = std::forward_iterator_tag;
 
-            PIterator();
+            iterator() = default;
             // Overloaded constructors
-            PIterator(std::vector<node<T, R>> theData, size_type position);
+            iterator(std::vector<node<T, R>> theData, size_type position);
             // Destructor
-            ~PIterator();
+            ~iterator();
             // Copy constructor
-            PIterator(const PIterator& copy);
+            iterator(const iterator& copy);
             // Move constructor
-            PIterator(PIterator&& move) noexcept;
+            iterator(iterator&& move) noexcept;
 
             // Copy assignmnet operator overload
-            PIterator& operator=(const PIterator& copy);
+            iterator& operator=(const iterator& copy);
             // Move assignment operator overload
-            PIterator& operator=(PIterator&& move);
+            iterator& operator=(iterator&& move);
             // Add
-            PIterator& operator+(const int& sum);
+            iterator& operator+(const int& sum);
             // Pre-increment
-            PIterator& operator++();
+            iterator& operator++();
             // Post-increment
-            PIterator operator++(int);
+            iterator operator++(int);
 
             node<T, R>& operator*();
             node<T, R>* operator->();
 
-            bool operator!=(const PIterator& rhs) const { return this->pos != rhs.pos; }
-            bool operator==(const PIterator& rhs) const { return this->pos == rhs.pos; }
+            bool operator!=(const iterator& rhs) const { return this->pos != rhs.pos; }
+            bool operator==(const iterator& rhs) const { return this->pos == rhs.pos; }
 
           private:
             std::vector<node<T, R>> data;
@@ -99,14 +99,14 @@ namespace usu
             }
         }
 
-        PIterator begin()
+        iterator begin()
         {
-            return PIterator(Q, 0);
+            return iterator(Q, 0);
         }
 
-        PIterator end()
+        iterator end()
         {
-            return PIterator(Q, numElements);
+            return iterator(Q, numElements);
         }
 
         void enqueue(T value, R priority)
@@ -144,7 +144,7 @@ namespace usu
             return maxNode;
         }
 
-        PIterator find(T value)
+        iterator find(T value)
         {
             for (auto i = begin(); i != end(); ++i)
             {
@@ -156,7 +156,7 @@ namespace usu
             return end();
         }
 
-        void update(PIterator i, priority_type priority)
+        void update(iterator i, priority_type priority)
         {
             int curr = index(i);
             Q[curr].priority = priority;
@@ -304,7 +304,7 @@ namespace usu
             }
         }
 
-        int index(PIterator i)
+        int index(iterator i)
         {
             int count = 0;
             for (auto j = begin(); j != end(); ++j, count++)
@@ -341,33 +341,33 @@ namespace usu
 
     // Overloaded constructor
     template <typename T, typename R = unsigned int>
-    priority_queue<T, R>::PIterator::PIterator(std::vector<node<T, R>> theData, size_type position)
+    priority_queue<T, R>::iterator::iterator(std::vector<node<T, R>> theData, size_type position)
     {
         data = theData;
         pos = position;
     }
     // Destructor
     template <typename T, typename R = unsigned int>
-    priority_queue<T, R>::PIterator::~PIterator()
+    priority_queue<T, R>::iterator::~iterator()
     {
     }
     // Copy constructor
     template <typename T, typename R = unsigned int>
-    priority_queue<T, R>::PIterator::PIterator(const priority_queue<T, R>::PIterator& copy)
+    priority_queue<T, R>::iterator::iterator(const priority_queue<T, R>::iterator& copy)
     {
         data = copy.data;
         pos = copy.pos;
     }
     // Move constructor
     template <typename T, typename R = unsigned int>
-    priority_queue<T, R>::PIterator::PIterator(priority_queue<T, R>::PIterator&& move) noexcept
+    priority_queue<T, R>::iterator::iterator(priority_queue<T, R>::iterator&& move) noexcept
     {
         std::swap(data, move.data);
         std::swap(pos, move.pos);
     }
     // Copy assignmnet operator overload
     template <typename T, typename R = unsigned int>
-    typename priority_queue<T, R>::PIterator& priority_queue<T, R>::PIterator::operator=(const priority_queue<T, R>::PIterator& copy)
+    typename priority_queue<T, R>::iterator& priority_queue<T, R>::iterator::operator=(const priority_queue<T, R>::iterator& copy)
     {
         if (this != &copy)
         {
@@ -379,7 +379,7 @@ namespace usu
     }
     // Move assignment operator overload
     template <typename T, typename R = unsigned int>
-    typename priority_queue<T, R>::PIterator& priority_queue<T, R>::PIterator::operator=(priority_queue<T, R>::PIterator&& move)
+    typename priority_queue<T, R>::iterator& priority_queue<T, R>::iterator::operator=(priority_queue<T, R>::iterator&& move)
     {
         if (this != &move)
         {
@@ -392,21 +392,21 @@ namespace usu
     }
     // Add operator overload (int)
     template <typename T, typename R = unsigned int>
-    typename priority_queue<T, R>::PIterator& priority_queue<T, R>::PIterator::operator+(const int& sum)
+    typename priority_queue<T, R>::iterator& priority_queue<T, R>::iterator::operator+(const int& sum)
     {
         pos += sum;
         return *this;
     }
     // Pre-increment
     template <typename T, typename R = unsigned int>
-    typename priority_queue<T, R>::PIterator& priority_queue<T, R>::PIterator::operator++()
+    typename priority_queue<T, R>::iterator& priority_queue<T, R>::iterator::operator++()
     {
         pos++;
         return *this;
     }
     // Post-increment
     template <typename T, typename R = unsigned int>
-    typename priority_queue<T, R>::PIterator priority_queue<T, R>::PIterator::operator++(int)
+    typename priority_queue<T, R>::iterator priority_queue<T, R>::iterator::operator++(int)
     {
         auto iter = *this;
         pos++;
@@ -415,13 +415,13 @@ namespace usu
     }
     // Dereference operator overload
     template <typename T, typename R = unsigned int>
-    node<T, R>& priority_queue<T, R>::PIterator::operator*()
+    node<T, R>& priority_queue<T, R>::iterator::operator*()
     {
         return data[pos];
     }
     // Arrow operator overload
     template <typename T, typename R = unsigned int>
-    node<T, R>* priority_queue<T, R>::PIterator::operator->()
+    node<T, R>* priority_queue<T, R>::iterator::operator->()
     {
         return &(data[pos]);
     }
